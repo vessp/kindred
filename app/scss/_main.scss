@@ -1,0 +1,31 @@
+body{
+   // margin: 0;
+    //font-family: 'Exo 2', sans-serif;
+    //background: white;
+}
+
+.page1 {
+    width: 500px;
+    height: 500px;
+}
+
+
+.comp1 {
+    .comp1-content {
+        //border: 1px solid rgb(243, 139, 114);
+
+        button {
+            color: rgba(243, 139, 114, 1.0);
+            background: transparent;
+            width: 75px;
+            height: 75px;
+            font-size: 35px;
+            outline: none;
+
+            &:hover {
+                color: rgba(243, 139, 114, 0.7);
+                border: 1px solid rgba(243, 139, 114, 0.7);
+            }
+        }
+    }
+}
