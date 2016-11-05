@@ -1,7 +1,5 @@
 import React from 'react'
-import SoundComponent from '../components/SoundComponent'
-const electron = window.require('electron')
-const BrowserWindow = electron.BrowserWindow
+import Playlist from '../components/Playlist'
 
 class _Component extends React.Component {
 
@@ -13,16 +11,19 @@ class _Component extends React.Component {
     }
 
     componentDidMount() {
-        this.props.actions.init()
+        
     }
 
     render () {
-        const {isSocketConnected, actions} = this.props
+        const {actions, isSocketConnected, isOverlay} = this.props
 
         return (
-            <div>
-            <i className={'fa' + (isSocketConnected?'fa-link':'fa-unlink')}></i>
-                <SoundComponent/>
+            <div className='home'>
+                <div className='home-inner'>
+                    <button onClick={() => actions.setOverlay(!isOverlay)}>overlay</button>
+                    <i className={'fa' + (isSocketConnected?'fa-link':'fa-unlink')}></i>
+                    <Playlist/>
+                </div>
             </div>
         )
     }
@@ -35,7 +36,8 @@ export default connect(
     (state) => {
         //map store to props
         return {
-            isSocketConnected: state.app.isSocketConnected
+            isSocketConnected: state.app.isSocketConnected,
+            isOverlay: state.app.isOverlay
         }
     },
     (dispatch) => {

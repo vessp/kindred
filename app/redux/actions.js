@@ -22,6 +22,12 @@ export function play(name) {
     }
 }
 
+export function setOverlay(flag) {
+    return (dispatch, getState) => {
+        ipcRenderer.send('setOverlay', flag)
+    }
+}
+
 export function init() {
     return (dispatch, getState) => {
         ipcRenderer.on('projectDir', (event, val) => {
@@ -30,6 +36,13 @@ export function init() {
                 payload: val
             })
         })
+        ipcRenderer.on('isOverlay', (event, val) => {
+            dispatch({
+                type: 'isOverlay',
+                payload: val
+            })
+        })
+
         ipcRenderer.send('projectDir', 'arg1')
 
         webSocket = new WebSocket(URL_WEB_SOCKET)
@@ -46,8 +59,7 @@ export function init() {
                     dispatch({type: 'playlist', payload: data.message})
                 }
                 else if(data.type == 'play') {
-                    console.log(data)
-                    dispatch({type: 'activePlay', payload: URL_AUDIO_ROOT + data.message})
+                    dispatch({type: 'activeBlurb', payload: URL_AUDIO_ROOT + data.message})
                 }
             }
         }

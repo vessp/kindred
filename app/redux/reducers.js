@@ -2,7 +2,8 @@ const initialState = {
     myCounter: 0,
     projectDir: __dirname,
     isSocketConnected: false,
-    activePlay: ''
+    activeBlurb: '',
+    isOverlay: false
 }
 
 function appReducer(state = initialState, action) {
@@ -23,9 +24,13 @@ function appReducer(state = initialState, action) {
         return Object.assign({}, state, {
             playlist: action.payload
         })
-    case 'activePlay':
+    case 'activeBlurb':
         return Object.assign({}, state, {
-            activePlay: action.payload
+            activeBlurb: action.payload
+        })
+    case 'isOverlay':
+        return Object.assign({}, state, {
+            isOverlay: action.payload
         })
     default:
         return state

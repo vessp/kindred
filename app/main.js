@@ -19,12 +19,48 @@ require('electron-reload')(projectDir+'\\bin')
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
-let overlayWindow
+// let overlayWindow
+let isOverlay = false
 
 //console.log(app.getPath('userData')) //C:\Users\Vessp\AppData\Roaming\Electron
 
 ipcMain.on('projectDir', (event, arg) => {
     event.sender.send('projectDir', projectDir)
+})
+
+ipcMain.on('setOverlay', (event, flag) => {
+    if(isOverlay == flag)
+        return
+
+    // if(flag) {
+    //     overlayWindow = new BrowserWindow({
+    //         width: 500,
+    //         height: 500,
+    //         maximizeable: false,
+    //         frame: false,
+    //         transparent: true
+    //     })
+    //     overlayWindow.loadURL('file://' + __dirname + '/index.html')
+    //     // overlayWindow.webContents.openDevTools()
+    //     overlayWindow.setAlwaysOnTop(true);
+    // }
+    // else {
+    //     overlayWindow.close()
+    //     overlayWindow = null
+    // }
+
+    mainWindow.setAlwaysOnTop(flag)
+    mainWindow.setFullScreen(flag)
+
+    if(flag) {
+
+    } else {
+        
+    }
+
+    isOverlay = flag
+    event.sender.send('isOverlay', isOverlay)
+    
 })
 
 // ipcMain.on('synchronous-message', (event, arg) => {
@@ -33,44 +69,19 @@ ipcMain.on('projectDir', (event, arg) => {
 // })
 
 function createWindow () {
-    //Browser window options
-    const browserOptions = {
+    mainWindow = new BrowserWindow({
         width: 1000,
         height: 500,
         maximizeable: false,
-        icon:'app/assets/logo.png'
-    }
-    // Create the browser window.
-    mainWindow = new BrowserWindow(browserOptions)
-
-    // and load the index.html of the app.
+        frame: false,
+        transparent: true,
+        titleBarStyle: false
+    })
     mainWindow.loadURL('file://' + __dirname + '/index.html')
-
-    // Open the DevTools.
     mainWindow.webContents.openDevTools()
-
-    // Emitted when the window is closed.
     mainWindow.on('closed', function() {
-        // Dereference the window object, usually you would store windows
-        // in an array if your app supports multi windows, this is the time
-        // when you should delete the corresponding element.
         mainWindow = null
     })
-
-    overlayWindow = new BrowserWindow({
-        width: 500,
-        height: 500,
-        maximizeable: false,
-        frame: false,
-        transparent: true
-    })
-    overlayWindow.loadURL('file://' + __dirname + '/index.html')
-    // overlayWindow.webContents.openDevTools()
-    overlayWindow.on('closed', () => {
-        overlayWindow = null
-    })
-
-    
 }
 
 // This method will be called when Electron has finished

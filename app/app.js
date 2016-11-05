@@ -8,6 +8,7 @@ import promiseMiddleware from 'redux-promise-middleware'
 import thunkMiddleware from 'redux-thunk'
 
 import appReducer from './redux/reducers'
+import Navigation from './containers/Navigation'
 
 const reducers = combineReducers({
     app:appReducer
@@ -18,21 +19,17 @@ const store = createStore(reducers, {}, applyMiddleware(
   promiseMiddleware()
 ))
 
-//Import Container component
-import Page1 from './containers/page1'
-import Home from './containers/Home'
 
 class App extends React.Component {
     render () {
         return (
             <Provider store={store}>
-                <Home />
+                <Navigation/>
             </Provider>
         )
     }
 }
 
-// Render to index.html
 ReactDOM.render(
   <App/>,
   document.getElementById('content')

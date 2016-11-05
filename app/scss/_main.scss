@@ -4,9 +4,13 @@ body{
     //background: white;
 }
 
-.page1 {
-    width: 500px;
-    height: 500px;
+.home {
+    background: transparent;
+    -webkit-app-region: drag;
+    padding: 20px;
+    .home-inner {
+        -webkit-app-region: no-drag;
+    }
 }
 
 

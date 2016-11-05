@@ -1,26 +1,23 @@
 import React from 'react'
-import RadialPlayer from '../components/RadialPlayer'
 
 class _Component extends React.Component {
-
     constructor(props) {
         super(props)
         this.state = {
-      
+            
         }
     }
 
-    componentDidMount() {
-        
+    onPlay(name) {
+        this.props.actions.play(name)
     }
 
-    render () {
-        const {actions, isOverlay} = this.props
+    render(){
+        const {playlist} = this.props
 
         return (
-            <div>
-                <button onClick={() => actions.setOverlay(!isOverlay)}>overlay</button>
-                <RadialPlayer/>
+            <div className="radial-player">
+                <h1>Radial</h1>
             </div>
         )
     }
@@ -31,13 +28,11 @@ import { bindActionCreators } from 'redux'
 import * as actions from '../redux/actions'
 export default connect(
     (state) => {
-        //map store to props
         return {
-            isOverlay: state.app.isOverlay
+            playlist: state.app.playlist,
         }
     },
     (dispatch) => {
-        //map dispatch to props
         return {
             actions: bindActionCreators(actions, dispatch)
         }
