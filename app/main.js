@@ -1,53 +1,56 @@
 'use strict'
 
 const electron = require('electron')
-// Module to control application life.
-const app = electron.app
-// Module to create native browser window.
-const BrowserWindow = electron.BrowserWindow
-const ipcMain = electron.ipcMain
+const {app, globalShortcut, ipcMain, BrowserWindow} = electron
 
 //Project Dir
 //__dirname = 'k:\Ghubs\electron-react-starter\app'
 let dirParts = __dirname.split('\\')
 dirParts.pop()
-const projectDir = dirParts.join('\\')
-// console.log(projectDir)
+const PROJECT_DIR = dirParts.join('\\')
+// console.log(PROJECT_DIR)
 
-require('electron-reload')(projectDir+'\\bin')
+require('electron-reload')(PROJECT_DIR+'\\bin')
 
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
-let mainWindow
-// let overlayWindow
+let mainWindow //keep reference to avoid GC
 let isOverlay = false
 
-//console.log(app.getPath('userData')) //C:\Users\Vessp\AppData\Roaming\Electron
-
 ipcMain.on('projectDir', (event, arg) => {
-    event.sender.send('projectDir', projectDir)
+    event.returnValue = PROJECT_DIR //synchronous return
 })
 
 ipcMain.on('setOverlay', (event, flag) => {
+    setOverlay(flag)
+})
+
+function createWindow () {
+    mainWindow = new BrowserWindow({
+        width: 1000,
+        height: 500,
+        // maximizeable: false,
+        frame: true,
+        transparent: true,
+        // titleBarStyle: false,
+        // resizable: false,
+        // skip-taskbar: true,
+        // type: 'notification',
+        // show: false,
+        // darkTheme: true
+    })
+
+    // mainWindow.webContents.on('ready-to-show', function () {
+    //     mainWindow.show();
+    // });
+    mainWindow.on('closed', () => {
+        mainWindow = null
+    })
+    mainWindow.loadURL('file://' + PROJECT_DIR + '/app/index.html')
+    mainWindow.webContents.openDevTools()
+}
+
+function setOverlay(flag) {
     if(isOverlay == flag)
         return
-
-    // if(flag) {
-    //     overlayWindow = new BrowserWindow({
-    //         width: 500,
-    //         height: 500,
-    //         maximizeable: false,
-    //         frame: false,
-    //         transparent: true
-    //     })
-    //     overlayWindow.loadURL('file://' + __dirname + '/index.html')
-    //     // overlayWindow.webContents.openDevTools()
-    //     overlayWindow.setAlwaysOnTop(true);
-    // }
-    // else {
-    //     overlayWindow.close()
-    //     overlayWindow = null
-    // }
 
     mainWindow.setAlwaysOnTop(flag)
     mainWindow.setFullScreen(flag)
@@ -59,37 +62,30 @@ ipcMain.on('setOverlay', (event, flag) => {
     }
 
     isOverlay = flag
-    event.sender.send('isOverlay', isOverlay)
-    
-})
-
-// ipcMain.on('synchronous-message', (event, arg) => {
-//     console.log(arg)  // prints "ping"
-//     event.returnValue = 'pong'
-// })
-
-function createWindow () {
-    mainWindow = new BrowserWindow({
-        width: 1000,
-        height: 500,
-        maximizeable: false,
-        frame: false,
-        transparent: true,
-        titleBarStyle: false
-    })
-    mainWindow.loadURL('file://' + __dirname + '/index.html')
-    mainWindow.webContents.openDevTools()
-    mainWindow.on('closed', function() {
-        mainWindow = null
-    })
+    mainWindow.webContents.send('isOverlay', isOverlay)
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
-app.on('ready', createWindow)
+app.on('ready', () => {
+    createWindow()
+
+    const ret = globalShortcut.register('F4', () => {
+        setOverlay(!isOverlay)
+    })
+
+    if (!ret) {
+        console.log('globalShortcut registration failed')
+    }
+})
+
+app.on('will-quit', () => {
+    // Unregister all shortcuts.
+    globalShortcut.unregisterAll()
+})
 
 // Quit when all windows are closed.
-app.on('window-all-closed', function () {
+app.on('window-all-closed', () => {
     // On OS X it is common for applications and their menu bar
     // to stay active until the user quits explicitly with Cmd + Q
     if (process.platform !== 'darwin') {
@@ -97,7 +93,7 @@ app.on('window-all-closed', function () {
     }
 })
 
-app.on('activate', function () {
+app.on('activate', () => {
     // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (mainWindow === null) {

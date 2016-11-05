@@ -5,10 +5,6 @@ const URL_WEB_SOCKET = 'ws://localhost:3000'
 const URL_AUDIO_ROOT = 'http://localhost:3000/audio/'
 let webSocket = null
 
-export function setMyCounter(val) {
-    return { type: 'myCounter', payload: val }
-}
-
 export function setPlaylist(val) {
     return { type: 'playlist', payload: val }
 }
@@ -30,20 +26,12 @@ export function setOverlay(flag) {
 
 export function init() {
     return (dispatch, getState) => {
-        ipcRenderer.on('projectDir', (event, val) => {
-            dispatch({
-                type: 'projectDir',
-                payload: val
-            })
-        })
         ipcRenderer.on('isOverlay', (event, val) => {
             dispatch({
                 type: 'isOverlay',
                 payload: val
             })
         })
-
-        ipcRenderer.send('projectDir', 'arg1')
 
         webSocket = new WebSocket(URL_WEB_SOCKET)
         webSocket.onopen = (event) => {

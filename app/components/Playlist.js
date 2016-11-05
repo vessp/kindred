@@ -43,7 +43,6 @@ class _Component extends React.Component {
 
         return (
             <div className="playlist">
-                <h1>Playlist</h1>
                 <button onClick={this.onUpload.bind(this)}>upload</button>
                 
                 {playlist && playlist.map(name => {

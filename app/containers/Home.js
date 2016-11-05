@@ -20,8 +20,7 @@ class _Component extends React.Component {
         return (
             <div className='home'>
                 <div className='home-inner'>
-                    <button onClick={() => actions.setOverlay(!isOverlay)}>overlay</button>
-                    <i className={'fa' + (isSocketConnected?'fa-link':'fa-unlink')}></i>
+                    <i className={'fa ' + (isSocketConnected?'fa-link':'fa-unlink')}></i>
                     <Playlist/>
                 </div>
             </div>
@@ -37,7 +36,8 @@ export default connect(
         //map store to props
         return {
             isSocketConnected: state.app.isSocketConnected,
-            isOverlay: state.app.isOverlay
+            isOverlay: state.app.isOverlay,
+            activeBlurb: state.app.activeBlurb,
         }
     },
     (dispatch) => {

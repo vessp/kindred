@@ -1,6 +1,8 @@
+const electron = window.require('electron')
+const {ipcRenderer} = electron
+
 const initialState = {
-    myCounter: 0,
-    projectDir: __dirname,
+    projectDir: ipcRenderer.sendSync('projectDir'),
     isSocketConnected: false,
     activeBlurb: '',
     isOverlay: false
@@ -8,14 +10,6 @@ const initialState = {
 
 function appReducer(state = initialState, action) {
     switch (action.type) {
-    case 'myCounter':
-        return Object.assign({}, state, {
-            myCounter: action.payload
-        })
-    case 'projectDir':
-        return Object.assign({}, state, {
-            projectDir: action.payload
-        })
     case 'isSocketConnected':
         return Object.assign({}, state, {
             isSocketConnected: action.payload

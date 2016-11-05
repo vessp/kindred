@@ -19,7 +19,6 @@ class _Component extends React.Component {
 
         return (
             <div>
-                <button onClick={() => actions.setOverlay(!isOverlay)}>overlay</button>
                 <RadialPlayer/>
             </div>
         )

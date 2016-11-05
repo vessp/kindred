@@ -17,7 +17,17 @@ class _Component extends React.Component {
 
         return (
             <div className="radial-player">
-                <h1>Radial</h1>
+                <div className="container">
+                    <div className="row">
+                        {playlist && playlist.map(name => {
+                            return (
+                                <div key={name} className="col-xs-3 alert alert-info"
+                                onClick={() => this.onPlay(name)}>{name}</div>
+                            )
+                        })}
+                    </div>
+                </div>
+                
             </div>
         )
     }
