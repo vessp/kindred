@@ -3,7 +3,7 @@
   "productName": "kindred",
   "version": "1.0.0",
   "description": "",
-  "main": "main.js",
+  "main": "./app/main.js",
   "scripts": {
     "test": "npm test",
     "start": "electron ./app/main.js"
@@ -35,6 +35,7 @@
     "babelify": "^7.3.0",
     "browserify": "^13.1.1",
     "concurrently": "^3.0.0",
+    "electron-winstaller": "^2.3.4",
     "eslint": "^3.8.0",
     "eslint-plugin-react": "^6.4.1",
     "gulp": "^3.9.1",
@@ -45,6 +46,7 @@
     "gulp-sass": "^2.3.2",
     "gulp-shell": "^0.5.2",
     "gulp-sourcemaps": "^2.2.0",
+    "gulp-util": "^3.0.7",
     "gulp-watch": "^4.3.10",
     "postcss-cli": "^2.6.0",
     "redux-devtools": "^3.3.1",

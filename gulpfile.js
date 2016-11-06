@@ -3,6 +3,7 @@ var watch = require('gulp-watch')
 var rename = require('gulp-rename')
 var runSequence = require('run-sequence').use(gulp)
 var shell = require('gulp-shell');
+var util = require('gulp-util');
 
 var browserify = require('browserify')
 var babelify = require('babelify')
@@ -73,6 +74,49 @@ gulp.task('watch', function() {
 
     return runSequence('js', 'css')
 })
+
+var electronPackager = require('electron-packager')
+gulp.task('pack', () => {
+    let opts = {
+        dir: '.', //dir of source
+        out: './build',
+        name: 'Kindred',
+        'app-version': '0.01',
+        overwrite: true,
+        //icon
+        // all: true,
+        arch: 'x64', //ia32, x64, armv7l, all
+        platform: 'win32', //linux, win32, darwin, mas, all
+    }
+    return electronPackager(opts, (err, appPath) => {
+            if (err) {
+                util.log(err)
+            }
+            else {
+                util.log('Built', util.colors.cyan(opts.name), util.colors.magenta('v' + opts.appVersion))
+                util.log('Packaged to: ');
+                for (var i = 0; i < appPath.length; i++) {
+                    util.log('            ', util.colors.cyan(appPath[i]));
+                }
+            }
+        });
+})
+
+var electronInstaller = require('electron-winstaller')
+gulp.task('build', function() {
+    resultPromise = electronInstaller.createWindowsInstaller({
+        appDirectory: './build/Kindred-win32-x64',
+        outputDirectory: './build/Kindred-installer-x64',
+        authors: 'David Roodnick',
+        exe: 'Kindred.exe',
+        description: 'Kindred'
+      });
+
+    resultPromise.then(() => console.log("It worked!"), (e) => console.log(`No dice: ${e.message}`));
+    return resultPromise
+})
+
+
 
 gulp.task('start', shell.task([
     'npm install',
