@@ -5,7 +5,8 @@ const initialState = {
     projectDir: ipcRenderer.sendSync('projectDir'),
     isSocketConnected: false,
     activeBlurb: '',
-    isOverlay: false
+    windowMode: 1,
+    overlayKeyCode: 115
 }
 
 function appReducer(state = initialState, action) {
@@ -22,9 +23,13 @@ function appReducer(state = initialState, action) {
         return Object.assign({}, state, {
             activeBlurb: action.payload
         })
-    case 'isOverlay':
+    case 'windowMode':
         return Object.assign({}, state, {
-            isOverlay: action.payload
+            windowMode: action.payload
+        })
+    case 'overlayKeyCode':
+        return Object.assign({}, state, {
+            overlayKeyCode: action.payload
         })
     default:
         return state

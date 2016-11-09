@@ -9,7 +9,9 @@ class _Component extends React.Component {
     }
 
     onPlay(name) {
+        // console.log('name', name)
         this.props.actions.play(name)
+        this.props.actions.windowMode(0)
     }
 
     render(){
@@ -21,8 +23,8 @@ class _Component extends React.Component {
                     <div className="row">
                         {playlist && playlist.map(name => {
                             return (
-                                <div key={name} className="col-xs-3 alert alert-info"
-                                onClick={() => this.onPlay(name)}>{name}</div>
+                                <div key={name} className="player-item col-xs-2"
+                                onClick={() => this.onPlay(name)}>{name.split('.')[0]}</div>
                             )
                         })}
                     </div>

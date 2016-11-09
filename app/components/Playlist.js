@@ -1,36 +1,12 @@
 import React from 'react'
 const electron = window.require('electron')
 const {dialog} = electron.remote
-import axios from 'axios'
-const fs = window.require('fs')
 
 class _Component extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
             
-        }
-    }
-
-    onUpload() {
-        let chosenFiles = dialog.showOpenDialog({properties: ['openFile']}) //'openDirectory', 'multiSelections'
-        if(chosenFiles) {
-            const chosenFilePath = chosenFiles[0]
-            const parts = chosenFilePath.split('\\')
-            const chosenFileName = parts[parts.length-1]
-            fs.open(chosenFilePath, 'r', (err, fd) => {
-                if (err) { console.log(err); return }
-                fs.readFile(fd, (err, fileBytes) => {
-                    if (err) { console.log(err); return }
-                    axios.post('http://localhost:3000/audio', {name: chosenFileName, data: fileBytes})
-                        .then(function (response) {
-                            console.log('response', response)
-                        })
-                        .catch(function (err) {
-                            console.log('err', err)
-                        })
-                })
-            })
         }
     }
 
@@ -43,11 +19,13 @@ class _Component extends React.Component {
 
         return (
             <div className="playlist">
-                <button onClick={this.onUpload.bind(this)}>upload</button>
-                
-                {playlist && playlist.map(name => {
-                    return <div key={name} onClick={() => this.onPlay(name)}>{name}</div>
-                })}
+                <ul className="list-group">
+                    {playlist && playlist.map(name => {
+                        // return <div key={name} onClick={() => this.onPlay(name)}>{name}</div>
+                        return <li key={name} onClick={() => this.onPlay(name)} 
+                                className="list-group-item">{name.split('.')[0]}</li>
+                    })}
+                </ul>
             </div>
         )
     }

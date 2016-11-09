@@ -18,18 +18,19 @@ class _Component extends React.Component {
     }
 
     render () {
-        const {actions, isOverlay, activeBlurb} = this.props
+        const {actions, windowMode, activeBlurb} = this.props
 
         return (
             <div>
-                {isOverlay ? <Overlay/> : <Home/>}
+                {windowMode==1 && <Home/>}
+                {windowMode==2 && <Overlay/>}
 
                 <Sound
                     url={activeBlurb}
                     playStatus={Sound.status.PLAYING}
                     onLoading={() => {}}
                     onPlaying={() => {}}
-                    onFinishedPlaying={() => {}}
+                    onFinishedPlaying={() => {this.props.actions.activeBlurb('')}}
                     />
             </div>
         )
@@ -42,7 +43,7 @@ import * as actions from '../redux/actions'
 export default connect(
     (state) => {
         return {
-            isOverlay: state.app.isOverlay,
+            windowMode: state.app.windowMode,
             activeBlurb: state.app.activeBlurb
         }
     },

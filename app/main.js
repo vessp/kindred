@@ -1,7 +1,12 @@
 'use strict'
 
 const electron = require('electron')
-const {app, globalShortcut, ipcMain, BrowserWindow} = electron
+const {app, globalShortcut, ipcMain, BrowserWindow, Menu, Tray} = electron
+const settings = require('electron-settings')
+var keyString = require('keycode')
+// settings.defaults({
+//   foo: 'bar'
+// })
 
 //Project Dir
 //__dirname = 'k:\Ghubs\electron-react-starter\app'
@@ -12,30 +17,41 @@ const PROJECT_DIR = dirParts.join('\\')
 
 require('electron-reload')(PROJECT_DIR+'\\bin')
 
-let mainWindow //keep reference to avoid GC
-let isOverlay = false
+let mainWindow = null //keep reference to avoid GC
+let windowMode = 0
+let tray = null
 
 ipcMain.on('projectDir', (event, arg) => {
     event.returnValue = PROJECT_DIR //synchronous return
 })
 
-ipcMain.on('setOverlay', (event, flag) => {
-    setOverlay(flag)
+ipcMain.on('windowMode', (event, mode) => {
+    setWindowMode(mode)
+})
+
+ipcMain.on('overlayKeyCode', (event, keyCode) => {
+    setOverlayKey(keyCode)
 })
 
 function createWindow () {
     mainWindow = new BrowserWindow({
-        width: 1000,
-        height: 500,
+        width: 300,
+        height: 280,
+        // useContentSize: true,
         // maximizeable: false,
-        frame: true,
+        moveable: false,
+        resizable: false,
+
+        frame: false,
         transparent: true,
+        // toolbar: false,
+        skipTaskbar: true,
         // titleBarStyle: false,
-        // resizable: false,
+
         // skip-taskbar: true,
-        // type: 'notification',
-        // show: false,
-        // darkTheme: true
+        // darkTheme: true,
+
+        show: false,
     })
 
     // mainWindow.webContents.on('ready-to-show', function () {
@@ -45,24 +61,44 @@ function createWindow () {
         mainWindow = null
     })
     mainWindow.loadURL('file://' + PROJECT_DIR + '/app/index.html')
-    mainWindow.webContents.openDevTools()
+    // mainWindow.webContents.openDevTools()
 }
 
-function setOverlay(flag) {
-    if(isOverlay == flag)
+function setWindowMode(mode) {
+    if(windowMode == mode)
         return
+    // console.log(mode)
 
-    mainWindow.setAlwaysOnTop(flag)
-    mainWindow.setFullScreen(flag)
+    //mainWindow.setAlwaysOnTop(mode == 2)
+    //mainWindow.setFullScreen(mode == 2)
+    if(mode == 2) {
+        mainWindow.setPosition(0, 0)
+        mainWindow.setSize(1920, 1080)
+    }
+    else if(mode == 1) {
+        mainWindow.setPosition(1920-10-300, 1080-40-10-280)
+        mainWindow.setSize(300, 280)
+    }
+    
 
-    if(flag) {
-
+    if(mode == 0) {
+        mainWindow.hide()
     } else {
-        
+        mainWindow.show()
     }
 
-    isOverlay = flag
-    mainWindow.webContents.send('isOverlay', isOverlay)
+    windowMode = mode
+    mainWindow.webContents.send('windowMode', mode)
+}
+
+function setOverlayKey(keyCode) {
+    globalShortcut.unregisterAll()
+    console.log(keyString(keyCode))
+    const result = globalShortcut.register(keyString(keyCode), () => {
+        setWindowMode(windowMode != 2 ? 2 : 0)
+    })
+    if (!result)
+        console.log('globalShortcut registration failed')
 }
 
 // This method will be called when Electron has finished
@@ -70,17 +106,30 @@ function setOverlay(flag) {
 app.on('ready', () => {
     createWindow()
 
-    const ret = globalShortcut.register('F4', () => {
-        setOverlay(!isOverlay)
+    const ret = globalShortcut.register('f4', () => {
+        setWindowMode(windowMode != 2 ? 2 : 0)
     })
-
     if (!ret) {
         console.log('globalShortcut registration failed')
     }
+
+    tray = new Tray(PROJECT_DIR + '/app/assets/split.png')
+    const contextMenu = Menu.buildFromTemplate([
+        {label: 'Upload', click: () => {
+            mainWindow.webContents.send('doUpload')
+        }},
+        {label: 'Exit', click: () => {
+            app.quit()
+        }}
+    ])
+    tray.setToolTip('Kindred')
+    tray.setContextMenu(contextMenu)
+    tray.on('click', () => {
+        setWindowMode(windowMode != 1 ? 1 : 0)
+    })
 })
 
 app.on('will-quit', () => {
-    // Unregister all shortcuts.
     globalShortcut.unregisterAll()
 })
 
