@@ -76,7 +76,7 @@ gulp.task('watch', function() {
 })
 
 var electronPackager = require('electron-packager')
-gulp.task('pack', () => {
+gulp.task('build', () => {
     let opts = {
         dir: '.', //dir of source
         out: './build',
@@ -103,7 +103,7 @@ gulp.task('pack', () => {
 })
 
 var electronInstaller = require('electron-winstaller')
-gulp.task('build', function() {
+gulp.task('build-installer', function() {
     resultPromise = electronInstaller.createWindowsInstaller({
         appDirectory: './build/Kindred-win32-x64',
         outputDirectory: './build/Kindred-installer-x64',

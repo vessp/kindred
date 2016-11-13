@@ -7,6 +7,7 @@ import { Provider } from 'react-redux'
 import promiseMiddleware from 'redux-promise-middleware'
 import thunkMiddleware from 'redux-thunk'
 
+import * as actions from './redux/actions'
 import appReducer from './redux/reducers'
 import Navigation from './containers/Navigation'
 
@@ -19,6 +20,7 @@ const store = createStore(reducers, {}, applyMiddleware(
   promiseMiddleware()
 ))
 
+store.dispatch(actions.init())
 
 class App extends React.Component {
     render () {

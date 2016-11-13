@@ -4,9 +4,9 @@ const electron = require('electron')
 const {app, globalShortcut, ipcMain, BrowserWindow, Menu, Tray} = electron
 const settings = require('electron-settings')
 var keyString = require('keycode')
-// settings.defaults({
-//   foo: 'bar'
-// })
+settings.defaults({
+  overlayKeyCode: 115
+})
 
 //Project Dir
 //__dirname = 'k:\Ghubs\electron-react-starter\app'
@@ -31,6 +31,10 @@ ipcMain.on('windowMode', (event, mode) => {
 
 ipcMain.on('overlayKeyCode', (event, keyCode) => {
     setOverlayKey(keyCode)
+})
+
+ipcMain.on('log', (event, message) => {
+    console.log(message)
 })
 
 function createWindow () {
@@ -106,12 +110,9 @@ function setOverlayKey(keyCode) {
 app.on('ready', () => {
     createWindow()
 
-    const ret = globalShortcut.register('f4', () => {
-        setWindowMode(windowMode != 2 ? 2 : 0)
-    })
-    if (!ret) {
-        console.log('globalShortcut registration failed')
-    }
+    settings.get('overlayKeyCode').then(keyCode => {
+        setOverlayKey(keyCode)
+    });
 
     tray = new Tray(PROJECT_DIR + '/app/assets/split.png')
     const contextMenu = Menu.buildFromTemplate([

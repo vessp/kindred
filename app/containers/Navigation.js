@@ -14,14 +14,19 @@ class _Component extends React.Component {
     }
 
     componentDidMount() {
-        this.props.actions.init()
+        document.getElementsByClassName('navigation')[0].style.display = 'none'
+        setTimeout(() => {
+            // document.getElementsByClassName('body-content')[0].style.display = 'none'
+            document.getElementsByClassName('navigation')[0].style.display = ''
+        }, 750)
+        
     }
 
     render () {
         const {actions, windowMode, activeBlurb} = this.props
 
         return (
-            <div>
+            <div className='navigation'>
                 {windowMode==1 && <Home/>}
                 {windowMode==2 && <Overlay/>}
 

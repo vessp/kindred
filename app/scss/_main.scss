@@ -84,7 +84,7 @@ html {
         overflow-x: hidden;
 
         .list-group-item {
-            padding: 5px;
+            padding: 0;
             text-align: center;
             background: $control-bg;
             border-color: $border;
@@ -92,10 +92,52 @@ html {
             cursor: pointer;
             user-select: none;
 
-            &:hover {
-                background-color: rgba(55, 90, 127,0.9);
-                color: white;
+            display: flex;
+            flex-wrap: nowrap;
+            flex-direction: row;
+
+            input {
+                width: 25px;
+                background: none;
+                border: none;
+                border-right: 1px solid $border;
             }
+
+            select {
+                background: none;
+                border: none;
+                border-right: 1px solid $border;
+                color: $text-light;
+                cursor: pointer;
+            }
+
+            span {
+                flex: 1;
+                padding: 5px;
+            }
+
+            i {
+                opacity: 0;
+                color: black;
+            }
+
+            > *:hover {
+                background-color: rgba(55, 90, 127,0.9);
+            }
+
+            &:hover {
+                // background-color: rgba(55, 90, 127,0.9);
+                // color: white;
+
+                i {
+                    opacity: 1;
+                    &:hover {
+                        color: white;
+                    }
+                }
+            }
+
+
         }
     }
 
