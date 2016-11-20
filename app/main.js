@@ -33,6 +33,8 @@ settings.defaults({
     hotkeyWindowTitle:'World of Warcraft',
     hitchName: 'Wow-64.exe'
 })
+// console.log(settings.getSettingsFilePath())
+settings.applyDefaultsSync()
 if(RESET_SETTINGS)
     settings.resetToDefaults()
 
