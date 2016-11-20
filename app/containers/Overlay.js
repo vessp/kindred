@@ -32,7 +32,7 @@ export default connect(
     (state) => {
         //map store to props
         return {
-            isOverlay: state.app.isOverlay
+            isOverlay: state.app.get('isOverlay')
         }
     },
     (dispatch) => {

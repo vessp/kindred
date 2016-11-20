@@ -1,5 +1,6 @@
 import React from 'react'
 
+import Splash from '../containers/Splash'
 import Home from '../containers/Home'
 import Overlay from '../containers/Overlay'
 const Sound = require('react-sound')
@@ -23,15 +24,21 @@ class _Component extends React.Component {
     }
 
     render () {
-        const {actions, windowMode, activeBlurb} = this.props
+        const {actions, isSocketConnected, windowMode, activeBlurb} = this.props
 
         return (
             <div className='navigation'>
-                {windowMode==1 && <Home/>}
-                {windowMode==2 && <Overlay/>}
+                {!isSocketConnected ? (
+                    <Splash/>
+                ) : (
+                    windowMode==1 && <Home/>
+                    ||
+                    windowMode==2 && <Overlay/>
+                )}
+                
 
                 <Sound
-                    url={activeBlurb}
+                    url={activeBlurb || ''}
                     playStatus={Sound.status.PLAYING}
                     onLoading={() => {}}
                     onPlaying={() => {}}
@@ -48,8 +55,9 @@ import * as actions from '../redux/actions'
 export default connect(
     (state) => {
         return {
-            windowMode: state.app.windowMode,
-            activeBlurb: state.app.activeBlurb
+            isSocketConnected: state.app.get('isSocketConnected'),
+            windowMode: state.app.get('windowMode'),
+            activeBlurb: state.app.get('activeBlurb')
         }
     },
     (dispatch) => {

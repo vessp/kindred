@@ -1,6 +1,6 @@
 import React from 'react'
 import Playlist from '../components/Playlist'
-var keyString = require('keycode')
+var toKeyString = require('keycode')
 
 class _Component extends React.Component {
 
@@ -15,30 +15,47 @@ class _Component extends React.Component {
         
     }
 
-    onKeyDown(e) {
-        // console.log(e, e.keyCode, keycode(e.keyCode))
-        this.props.actions.overlayKeyCode(e.keyCode)
+    onOverlayKey(e) {
+        this.props.actions.overlayKey(toKeyString(e.keyCode).toUpperCase())
+    }
+
+    onHotkeyWindowTitle(e) {
+        const value = e.target.value
+        clearTimeout(this.timeoutId)
+        this.timeoutId = setTimeout(() => {
+            this.props.actions.hotkeyWindowTitle(value)
+        }, 1000)
     }
 
     render () {
-        const {actions, isSocketConnected, overlayKeyCode} = this.props
+        const {actions, isSocketConnected, overlayKey, hotkeyWindowTitle} = this.props
 
-        return (
-            <div className='home container-fluid'>
-                <i className={'fa ' + 'fa-remove'} onClick={() => this.props.actions.windowMode(0)}></i>
+        let contents = <i className={'fa fa-circle-o-notch fa-spin'}/>
+        if(hotkeyWindowTitle != null) {
+            contents = (
                 <div className='home-inner row'>
                     <div className='col-xs-5'>
-                        <div>
-                            <i className={'fa ' + (isSocketConnected?'fa-link':'fa-unlink')}></i>
+                        <div className='icon-bar'>
+                            <i className={'fa fa-power-off onClick'}
+                                onClick={() => actions.doSocketDisconnect()}
+                                title='Disconnect'/>
+                            <i className={'fa ' + (isSocketConnected?'fa-link':'fa-unlink')}
+                                title={isSocketConnected?'Connected to Server':'Disconnected from Server'}/>
                         </div>
                         <hr/>
                         <form>
                             <div className="form-group">
                                 <label>Overlay Key</label>
-                                <input type="text" className="form-control" onKeyDown={this.onKeyDown.bind(this)}
-                                    value={keyString(overlayKeyCode)} onChange={() => {}}/>
+                                <input type="text" className="form-control" onKeyDown={this.onOverlayKey.bind(this)}
+                                    value={overlayKey} onChange={() => {}}/>
                             </div>
-                            <div className='btn btn-primary' onClick={() => this.props.actions.onUpload()}>Upload</div>
+                            <div className="form-group">
+                                <label>Hotkey Window Title</label>
+                                <input type="text" className="form-control"
+                                    defaultValue={hotkeyWindowTitle}
+                                    onChange={e => this.onHotkeyWindowTitle(e)}/>
+                            </div>
+                            <div className='btn btn-primary' onClick={actions.onUpload}>Upload</div>
                         </form>
                         <hr/>
                     </div>
@@ -46,6 +63,13 @@ class _Component extends React.Component {
                         <Playlist/>
                     </div>
                 </div>
+            )
+        }
+
+        return (
+            <div className='home container-fluid'>
+                <i className={'fa ' + 'fa-remove'} onClick={() => actions.windowMode(0)}/>
+                {contents}
             </div>
         )
     }
@@ -58,9 +82,10 @@ export default connect(
     (state) => {
         //map store to props
         return {
-            isSocketConnected: state.app.isSocketConnected,
-            activeBlurb: state.app.activeBlurb,
-            overlayKeyCode: state.app.overlayKeyCode
+            isSocketConnected: state.app.get('isSocketConnected'),
+            activeBlurb: state.app.get('activeBlurb'),
+            overlayKey: state.app.get('overlayKey'),
+            hotkeyWindowTitle: state.app.get('hotkeyWindowTitle'),
         }
     },
     (dispatch) => {

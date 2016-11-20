@@ -10,7 +10,7 @@ class _Component extends React.Component {
 
     onPlay(name) {
         // console.log('name', name)
-        this.props.actions.play(name)
+        this.props.actions.playGlobal(name)
         this.props.actions.windowMode(0)
     }
 
@@ -41,7 +41,7 @@ import * as actions from '../redux/actions'
 export default connect(
     (state) => {
         return {
-            playlist: state.app.playlist,
+            playlist: state.app.get('playlist'),
         }
     },
     (dispatch) => {
