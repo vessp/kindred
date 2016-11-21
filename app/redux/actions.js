@@ -212,6 +212,7 @@ function doUpload(getState) {
         const chosenFilePath = chosenFiles[0]
         const parts = chosenFilePath.split('\\')
         const chosenFileName = parts[parts.length-1]
+        // trace('uploading..', chosenFilePath)
 
         if(getState().app.get('playlist').indexOf(chosenFileName) != -1)
         {
@@ -220,8 +221,10 @@ function doUpload(getState) {
             return
         }
 
+        // trace('opening..', chosenFilePath)
         fs.open(chosenFilePath, 'r', (err, fd) => {
             if (err) { trace(err); return }
+            // trace('file opened..', chosenFilePath)
             fs.readFile(fd, (err, fileBytes) => {
                 if (err) { trace(err); return }
                 trace('posting..', chosenFilePath)
