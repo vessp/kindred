@@ -213,8 +213,7 @@ function doUpload(getState) {
         const parts = chosenFilePath.split('\\')
         const chosenFileName = parts[parts.length-1]
 
-        console.log(getState().app.playlist, chosenFileName)
-        if(getState().app.playlist.indexOf(chosenFileName) != -1)
+        if(getState().app.get('playlist').indexOf(chosenFileName) != -1)
         {
             alert('That name is already taken.  Please choose a different one.', 'Kindred')
             trace('name already taken')
@@ -222,15 +221,16 @@ function doUpload(getState) {
         }
 
         fs.open(chosenFilePath, 'r', (err, fd) => {
-            if (err) { console.log(err); return }
+            if (err) { trace(err); return }
             fs.readFile(fd, (err, fileBytes) => {
-                if (err) { console.log(err); return }
+                if (err) { trace(err); return }
+                trace('posting..', chosenFilePath)
                 axios.post(config.URL_AUDIO_ROOT, {name: chosenFileName, data: fileBytes})
                     .then(function (response) {
-                        console.log('response', response)
+                        trace('response', response)
                     })
                     .catch(function (err) {
-                        console.log('err', err)
+                        trace('err', err)
                     })
             })
         })
