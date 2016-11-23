@@ -33,7 +33,8 @@ settings.defaults({
     overlayKey: 'F4',
     keyMap: {},
     hotkeyWindowTitle:'World of Warcraft',
-    hitchName: 'Wow-64.exe'
+    hitchName: 'Wow-64.exe',
+    playlist: []
 })
 // console.log(settings.getSettingsFilePath())
 settings.applyDefaultsSync()
