@@ -117,10 +117,14 @@ gulp.task('build-installer', function() {
 })
 
 
-
 gulp.task('start', shell.task([
     'npm install',
-    'npm start',
+    'npm run start',
+]))
+
+gulp.task('start_dev', shell.task([
+    // 'npm install',
+    'npm run start_dev',
 ]))
 
 gulp.task('default', ['watch', 'start'])

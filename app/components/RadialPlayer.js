@@ -21,7 +21,8 @@ class _Component extends React.Component {
             <div className="radial-player">
                 <div className="container">
                     <div className="row">
-                        {playlist && playlist.map(name => {
+                        {playlist && playlist.map(clip => {
+                            const name = clip.get('name')
                             return (
                                 <div key={name} className="player-item col-xs-2"
                                 onClick={() => this.onPlay(name)}>{name.split('.')[0]}</div>

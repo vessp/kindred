@@ -1,15 +1,22 @@
 'use strict'
+const electron = require('electron')
+const {app, globalShortcut, ipcMain, BrowserWindow, Menu, Tray} = electron
+const settings = require('electron-settings')
+const {spawn, exec} = require('child_process')
+const AutoLaunch = require('auto-launch')
 
-//DEV
-// const SHOW_DEV_TOOLS = true
-// const START_OPEN = true
-// const RESET_SETTINGS = true
+const config = require('./config').getConfig(process.env.NODE_ENV == 'development')
 
-//Prod
-const SHOW_DEV_TOOLS = false
-const START_OPEN = false
-const RESET_SETTINGS = false
+let SHOW_DEV_TOOLS = false
+let RESET_SETTINGS = false
 
+if(config.IS_DEV) {
+    SHOW_DEV_TOOLS = true
+    // RESET_SETTINGS = true
+}
+
+const DEV_TOOLS_MODE = 'right'
+// const DEV_TOOLS_MODE = 'undocked'
 
 //--build structure--
 //folder
@@ -20,12 +27,7 @@ const RESET_SETTINGS = false
 //------app/
 //------------------
 
-const electron = require('electron')
-const {app, globalShortcut, ipcMain, BrowserWindow, Menu, Tray} = electron
-const settings = require('electron-settings')
-const {spawn} = require('child_process')
-const config = require('./config')
-const AutoLaunch = require('auto-launch')
+
 
 settings.defaults({
     overlayKey: 'F4',
@@ -63,11 +65,21 @@ let tray = null
 let isAttemptingHotkeySet = false
 let kindredKeysProcess = null
 
-const WIN_MAIN_WIDTH = 460 + (SHOW_DEV_TOOLS?500:0)
+const WIN_MAIN_WIDTH = 460 + (SHOW_DEV_TOOLS && DEV_TOOLS_MODE=='right'?500:0)
 const WIN_MAIN_HEIGHT = 330
 
 ipcMain.on('projectDir', (event, arg) => {
     event.returnValue = PROJECT_DIR //synchronous return
+})
+
+ipcMain.on('userDataDir', (event, arg) => {
+    // console.log(app.getPath('userData')) //C:\Users\Vessp\AppData\Roaming\Electron
+    // console.log(app.getPath('appData')) //C:\Users\Vessp\AppData\Roaming
+    event.returnValue = app.getPath('userData')
+})
+
+ipcMain.on('config', (event, arg) => {
+    event.returnValue = config
 })
 
 ipcMain.on('windowMode', (event, mode) => {
@@ -127,7 +139,7 @@ function createWindow () {
     })
     mainWindow.loadURL('file://' + PROJECT_DIR + '/app/index.html')
     if(SHOW_DEV_TOOLS)
-        mainWindow.webContents.openDevTools()
+        mainWindow.webContents.openDevTools({mode:DEV_TOOLS_MODE})
 }
 
 function setWindowMode(mode) {

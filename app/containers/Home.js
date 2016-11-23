@@ -28,7 +28,7 @@ class _Component extends React.Component {
     }
 
     render () {
-        const {actions, isSocketConnected, overlayKey, hotkeyWindowTitle} = this.props
+        const {actions, isSocketConnected, overlayKey, hotkeyWindowTitle, userCount} = this.props
 
         let contents = <i className={'fa fa-circle-o-notch fa-spin'}/>
         if(hotkeyWindowTitle != null) {
@@ -36,11 +36,19 @@ class _Component extends React.Component {
                 <div className='home-inner row'>
                     <div className='col-xs-5'>
                         <div className='icon-bar'>
-                            <i className={'fa fa-power-off onClick'}
-                                onClick={() => actions.doSocketDisconnect()}
-                                title='Disconnect'/>
-                            <i className={'fa ' + (isSocketConnected?'fa-link':'fa-unlink')}
-                                title={isSocketConnected?'Connected to Server':'Disconnected from Server'}/>
+                            <span>
+                                <i className={'fa fa-power-off onClick'}
+                                    onClick={() => actions.doSocketDisconnect()}
+                                    title='Disconnect'/>
+                                <i className={'fa fa-folder-open-o onClick'}
+                                    onClick={() => actions.openPlaylistFolder()}
+                                    title='Open playlist folder'/>
+                            </span>
+                            <span>
+                                <i className={'fa ' + (isSocketConnected?'fa-link':'fa-unlink')}
+                                    title={isSocketConnected?'Connected to Server':'Disconnected from Server'}/>
+                                <i className={'fa fa-user'} title='Number of connected users'>{' ' + userCount}</i>
+                            </span>
                         </div>
                         <hr/>
                         <form>
@@ -86,6 +94,7 @@ export default connect(
             activeBlurb: state.app.get('activeBlurb'),
             overlayKey: state.app.get('overlayKey'),
             hotkeyWindowTitle: state.app.get('hotkeyWindowTitle'),
+            userCount: state.app.get('userCount'),
         }
     },
     (dispatch) => {

@@ -3,19 +3,24 @@ const {ipcRenderer} = electron
 const settings =  window.require('electron-settings')
 const Immutable = window.require('immutable')
 import {trace} from '../util/Tracer'
+import IO from '../util/IO'
+const fs = window.require('fs')
 
 const initialState = Immutable.fromJS({
     projectDir: ipcRenderer.sendSync('projectDir'),
+    userDataDir: ipcRenderer.sendSync('userDataDir'), //C:\Users\Vessp\AppData\Roaming\Electron
+    config: ipcRenderer.sendSync('config'),
     isSocketConnected: false,
     activeBlurb: null,
     windowMode: null,
-    overlayKey: null,//115, //don't need this default
+    overlayKey: null,
     lastActionInstant: Date.now(),
     lastMessageInstant: Date.now(),
     keyMap: null,
     hotkeyWindowTitle: null,
     hitchActive: false,
-    hitchName: null
+    hitchName: null,
+    userCount: null
 })
 
 function appReducer(state = initialState, action) {
@@ -30,10 +35,13 @@ function appReducer(state = initialState, action) {
         registerKeyMap(newState)
         return newState
     case 'playlist':
-        payload.sort((a,b) => a.localeCompare(b))
-        return state.merge({
+        payload.sort((a,b) => a.name.localeCompare(b.name))
+        newState = state.merge({
             playlist: payload
         })
+        settings.set('playlist', payload)
+        downloadPlaylist(newState)
+        return newState
     case 'activeBlurb':
         return state.merge({
             activeBlurb: payload,
@@ -95,6 +103,10 @@ function appReducer(state = initialState, action) {
         return state.merge({
             hitchName: payload
         })
+    case 'userCount':
+        return state.merge({
+            userCount: payload
+        })
     default:
         return state
     }
@@ -116,4 +128,32 @@ function registerKeyMap(state) {
 
 function toMain(type, payload) {
     ipcRenderer.send(type, payload)
+}
+
+function downloadPlaylist(state) {
+    const playlistDir = state.get('userDataDir') + '\\playlist'
+    if (!fs.existsSync(playlistDir))
+        fs.mkdirSync(playlistDir)
+
+    const config = state.get('config')
+    const newPlaylist = state.get('playlist')
+    settings.get('playlist').then(oldPlaylist => {
+        for(let newClip of newPlaylist) {
+            const name = newClip.get('name')
+            let wasFound = false
+            for(let oldClip of oldPlaylist) {
+                if(oldClip.name == name &&
+                   oldClip.added_at == newClip.get('added_at'))
+                {
+                    wasFound = true
+                    break
+                }
+            }
+
+            const url = config.get('URL_AUDIO_ROOT') + '/' + name
+            const path = playlistDir + '\\' + name
+            if(!wasFound || !fs.existsSync(path))
+                IO.downloadFile(url, path )
+        }
+    })
 }

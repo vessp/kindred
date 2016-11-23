@@ -1,12 +1,13 @@
 const electron = window.require('electron')
-const {ipcRenderer, shell} = electron
+const {ipcRenderer, shell, app} = electron
 const {dialog} = electron.remote
 const fs = window.require('fs')
 const axios = window.require('axios')
 const settings = window.require('electron-settings')
 import {trace} from '../util/Tracer'
 const {exec} = window.require('child_process')
-import config from '../config'
+
+const config = ipcRenderer.sendSync('config')
 
 let webSocket = null
 let _dispatch = null
@@ -16,10 +17,6 @@ function toReducer(type, payload) {
 }
 function toMain(type, payload) {
     ipcRenderer.send(type, payload)
-}
-
-export function setPlaylist(val) {
-    return { type: 'playlist', payload: val }
 }
 
 export function playGlobal(name) {
@@ -33,7 +30,9 @@ export function playGlobal(name) {
 
 export function playLocal(name) {
     return (dispatch, getState) => {
-        dispatch({type: 'activeBlurb', payload: config.URL_AUDIO_ROOT + name})
+        const clipPath = getState().app.get('userDataDir') + '\\playlist\\' + name
+        trace('playLocal: ' + clipPath)
+        dispatch({ type: 'activeBlurb', payload: clipPath})
     }
 }
 
@@ -91,11 +90,18 @@ export function hitchName(name) {
     }
 }
 
+export function openPlaylistFolder(path) {
+    return (dispatch, getState) => {
+        const playlistDir = getState().app.get('userDataDir') + '\\playlist'
+        exec('start ' + playlistDir)
+    }
+}
+
 export function init() {
     return (dispatch, getState) => {
         _dispatch = dispatch
 
-        toReducer('windowMode', 0)
+        toReducer('windowMode', 1)
 
         settings.get('overlayKey').then(val => {
             toReducer('overlayKey', val)
@@ -132,7 +138,8 @@ export function init() {
             toReducer('windowMode', windowMode != 1 ? 1 : 0)
         })
 
-        startProcessChecking(dispatch, getState)
+        // startProcessChecking(dispatch, getState)
+        dispatch(doSocketConnect())
     }
 }
 
@@ -149,12 +156,15 @@ export function doSocketConnect() {
         webSocket.onmessage = (event) => {
             if(event.data) {
                 const data = JSON.parse(event.data)
+                // trace('onMessage:', data.type, data.message)
                 if(data.type == 'playlist') {
                     dispatch({type: 'playlist', payload: data.message})
                 }
                 else if(data.type == 'play') {
-                    dispatch({type: 'activeBlurb', payload: config.URL_AUDIO_ROOT + data.message})
-                    trace('play: ' + config.URL_AUDIO_ROOT + data.message)
+                    dispatch(playLocal(data.message))
+                }
+                else if(data.type == 'userCount') {
+                    dispatch({type: 'userCount', payload: data.message})
                 }
             }
             toReducer('lastMessageInstant', Date.now())

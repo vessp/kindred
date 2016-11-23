@@ -21,8 +21,19 @@ class _Component extends React.Component {
             this.props.actions.removeAudio(name)
     }
     onSetHotkey(e, clipName) {
+        //shift 16
+        //ctrl 17
+        //alt 18
+        if(e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18)
+            return
+
+        let modifier = ''
+        if(e.ctrlKey)
+            modifier += 'CTRL+'
+
+        trace('ctrl', e.ctrlKey, e.shiftKey, e.altKey)
         e.target.blur()
-        const keyString = toKeyString(e.keyCode).toUpperCase()
+        const keyString = modifier + toKeyString(e.keyCode).toUpperCase()
         this.props.actions.setClipKey(clipName, keyString)
     }
     onClearHotkey(clipName) {
@@ -37,7 +48,8 @@ class _Component extends React.Component {
         return (
             <div className="playlist">
                 <ul className="list-group">
-                    {playlist && playlist.map(name => {
+                    {playlist && playlist.map(clip => {
+                        const name = clip.get('name')
                         const keyString = keyMap.get(name)
                         const shortName = name.split('.')[0]
                         return (
@@ -49,18 +61,23 @@ class _Component extends React.Component {
                                         onChange={() => {}}
                                         />
                                     <i className={'fa fa-remove'}
-                                        onClick={() => this.onClearHotkey(name)}/>
+                                        onClick={e => {
+                                            e.stopPropagation()
+                                            this.onClearHotkey(name)
+                                        }}/>
                                 </span>
                                 {/*<select>
                                     <option>PASS</option>
                                     <option>block</option>
                                 </select>*/}
-                                <span className='item-name'>
-                                    <span onClick={() => this.onPlay(name)}>
-                                        {shortName}
-                                    </span>
+                                <span className='item-name'
+                                    onClick={() => this.onPlay(name)}>
+                                    {shortName}
                                     <i className={'fa fa-remove'}
-                                        onClick={() => this.onRemoveAudio(name)}/>
+                                        onClick={e => {
+                                            e.stopPropagation()
+                                            this.onRemoveAudio(name)
+                                        }}/>
                                 </span>
                             </li>
                         )
