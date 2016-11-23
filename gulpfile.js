@@ -77,9 +77,15 @@ gulp.task('watch', function() {
 
 var electronPackager = require('electron-packager')
 gulp.task('build', () => {
+    doBuild('./build')
+})
+gulp.task('build-dist', () => {
+    doBuild('../kankei/dist')
+})
+function doBuild(outPath) { 
     let opts = {
         dir: '.', //dir of source
-        out: './build',
+        out: outPath,
         name: 'Kindred',
         'app-version': '0.01',
         overwrite: true,
@@ -89,18 +95,18 @@ gulp.task('build', () => {
         platform: 'win32', //linux, win32, darwin, mas, all
     }
     return electronPackager(opts, (err, appPath) => {
-            if (err) {
-                util.log(err)
+        if (err) {
+            util.log(err)
+        }
+        else {
+            util.log('Built', util.colors.cyan(opts.name), util.colors.magenta('v' + opts.appVersion))
+            util.log('Packaged to: ');
+            for (var i = 0; i < appPath.length; i++) {
+                util.log('            ', util.colors.cyan(appPath[i]));
             }
-            else {
-                util.log('Built', util.colors.cyan(opts.name), util.colors.magenta('v' + opts.appVersion))
-                util.log('Packaged to: ');
-                for (var i = 0; i < appPath.length; i++) {
-                    util.log('            ', util.colors.cyan(appPath[i]));
-                }
-            }
-        });
-})
+        }
+    })
+}
 
 var electronInstaller = require('electron-winstaller')
 gulp.task('build-installer', function() {
