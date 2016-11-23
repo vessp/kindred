@@ -28,8 +28,9 @@ class _Component extends React.Component {
             return
 
         let modifier = ''
-        if(e.ctrlKey)
-            modifier += 'CTRL+'
+        if(e.ctrlKey) modifier += 'CTRL+'
+        if(e.shiftKey) modifier += 'SHIFT+'
+        if(e.altKey) modifier += 'ALT+'
 
         trace('ctrl', e.ctrlKey, e.shiftKey, e.altKey)
         e.target.blur()
