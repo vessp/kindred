@@ -138,8 +138,8 @@ export function init() {
             toReducer('windowMode', windowMode != 1 ? 1 : 0)
         })
 
-        // startProcessChecking(dispatch, getState)
-        dispatch(doSocketConnect())
+        startProcessChecking(dispatch, getState)
+        // dispatch(doSocketConnect())
     }
 }
 
@@ -252,40 +252,47 @@ function doUpload(getState) {
 
 let processCheckingTimer = null
 function startProcessChecking(dispatch, getState) {
-    if(processCheckingTimer != null)
+    if(processCheckingTimer == null) {
+        checkProcesses()
         return
+    }
 
-    const ref = () => {
+    function ref() {
         processCheckingTimer = setTimeout(() => {
             processCheckingTimer = null
             startProcessChecking(dispatch, getState)
         }, 60*1000)
     }
 
-    const hitchName = getState().app.get('hitchName')
-    if(hitchName == null) {
-        ref()
-        return
-    }
-
-    exec('tasklist /fo csv /fi "Imagename eq ' + hitchName + '"', (error, stdout, stderr) => {
-        if(error) trace('tasklist error:', error)
-        if(stderr) trace('tasklist stderr:', stderr)
-        const lines = stdout.replace(/[\"\r]/g, '').split('\n').filter(line => line.length > 0)
-        if(lines.length > 1) { //if we found a matching process
-            const processName = lines[1].split(',')[0]
-            // trace('process found', processName)
-            toReducer('hitchActive', true)
-
-            const isSocketConnected = getState().app.get('isSocketConnected')
-            if(!isSocketConnected)
-                dispatch(doSocketConnect())
+    function checkProcesses() {
+        const hitchName = getState().app.get('hitchName')
+        if(hitchName == null || hitchName == '') {
+            // trace('no hitch')
+            onHitchPass()
         }
         else {
-            // trace('no process found')
-            toReducer('hitchActive', false)
+            exec('tasklist /fo csv /fi "Imagename eq ' + hitchName + '"', (error, stdout, stderr) => {
+                if(error) trace('tasklist error:', error)
+                if(stderr) trace('tasklist stderr:', stderr)
+                const lines = stdout.replace(/[\"\r]/g, '').split('\n').filter(line => line.length > 0)
+                if(lines.length > 1) { //if we found a matching process
+                    const processName = lines[1].split(',')[0]
+                    // trace('process found', processName)
+                    onHitchPass()
+                }
+                else {
+                    // trace('no process found')
+                    toReducer('hitchActive', false)
+                }
+            })
         }
         ref()
-    })
+    }
 
+    function onHitchPass() {
+        toReducer('hitchActive', true)
+        const isSocketConnected = getState().app.get('isSocketConnected')
+        if(!isSocketConnected)
+            dispatch(doSocketConnect())
+    }
 }
