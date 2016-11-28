@@ -3,6 +3,7 @@ import React from 'react'
 import Splash from '../containers/Splash'
 import Home from '../containers/Home'
 import Overlay from '../containers/Overlay'
+import Update from '../containers/Update'
 const Sound = require('react-sound')
 
 class _Component extends React.Component {
@@ -24,18 +25,21 @@ class _Component extends React.Component {
     }
 
     render () {
-        const {actions, isSocketConnected, windowMode, activeBlurb} = this.props
+        const {actions, isSocketConnected, windowMode, activeBlurb, isCrisp} = this.props
+
+        let page = null
+        if(!isCrisp)
+            page = <Update/>
+        else if(!isSocketConnected)
+            page = <Splash/>
+        else if(windowMode==1)
+            page = <Home/>
+        else if(windowMode==2)
+            page = <Overlay/>
 
         return (
             <div className='navigation'>
-                {!isSocketConnected ? (
-                    <Splash/>
-                ) : (
-                    windowMode==1 && <Home/>
-                    ||
-                    windowMode==2 && <Overlay/>
-                )}
-                
+                {page}
 
                 <Sound
                     url={activeBlurb || ''}
@@ -57,7 +61,8 @@ export default connect(
         return {
             isSocketConnected: state.app.get('isSocketConnected'),
             windowMode: state.app.get('windowMode'),
-            activeBlurb: state.app.get('activeBlurb')
+            activeBlurb: state.app.get('activeBlurb'),
+            isCrisp: state.app.get('isCrisp'),
         }
     },
     (dispatch) => {

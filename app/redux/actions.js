@@ -6,6 +6,7 @@ const axios = window.require('axios')
 const settings = window.require('electron-settings')
 import {trace} from '../util/Tracer'
 const {exec} = window.require('child_process')
+import IO from '../util/IO'
 
 const config = ipcRenderer.sendSync('config')
 
@@ -140,6 +141,7 @@ export function init() {
 
         startProcessChecking(dispatch, getState)
         // dispatch(doSocketConnect())
+        downloadUpdate(dispatch, getState)
     }
 }
 
@@ -180,6 +182,23 @@ export function doSocketDisconnect() {
         webSocket.close()
         webSocket = null
     }
+}
+
+export function downloadUpdate(dispatch, getState){
+
+    //first check latest version on server and compare to me
+
+    //if new version available download file
+    toReducer('isCrisp', false)
+
+    const zipfileUrl = config.URL_SERVER_ROOT + '/dist/Kindred-win32-x64.zip'
+    const dlPath = './crisp/Kindred-win32-x64.zip'
+    IO.downloadFile(zipfileUrl, dlPath, () => {
+        
+    },
+    (progress) => {
+        toReducer('crispDlProgress', progress)
+    })
 }
 
 let pingTimer = null

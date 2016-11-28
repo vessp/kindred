@@ -6,8 +6,9 @@ import {trace} from '../util/Tracer'
 import IO from '../util/IO'
 const fs = window.require('fs')
 
+const config = ipcRenderer.sendSync('config')
+
 const initialState = Immutable.fromJS({
-    projectDir: ipcRenderer.sendSync('projectDir'),
     userDataDir: ipcRenderer.sendSync('userDataDir'), //C:\Users\Vessp\AppData\Roaming\Electron
     config: ipcRenderer.sendSync('config'),
     isSocketConnected: false,
@@ -20,7 +21,10 @@ const initialState = Immutable.fromJS({
     hotkeyWindowTitle: null,
     hitchActive: false,
     hitchName: null,
-    userCount: null
+    userCount: null,
+    isCrisp: false,
+    crispDlProgress: null,
+
 })
 
 function appReducer(state = initialState, action) {
@@ -107,6 +111,14 @@ function appReducer(state = initialState, action) {
         return state.merge({
             userCount: payload
         })
+    case 'isCrisp':
+        return state.merge({
+            isCrisp: payload
+        })
+    case 'crispDlProgress':
+        return state.merge({
+            crispDlProgress: payload
+        })
     default:
         return state
     }
@@ -131,11 +143,12 @@ function toMain(type, payload) {
 }
 
 function downloadPlaylist(state) {
-    const playlistDir = state.get('userDataDir') + '\\playlist'
+    const config = state.get('config')
+
+    const playlistDir = config.get('PATH_USER_DATA') + '\\playlist'
     if (!fs.existsSync(playlistDir))
         fs.mkdirSync(playlistDir)
 
-    const config = state.get('config')
     const newPlaylist = state.get('playlist')
     settings.get('playlist').then(oldPlaylist => {
         for(let newClip of newPlaylist) {

@@ -92,6 +92,36 @@ i {
     }
 }
 
+.update {
+    @extend .task-window;
+
+    .update-inner {
+        -webkit-app-region: no-drag;
+
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+        text-align: center;
+
+        .center-stage {
+            justify-content: flex-start;
+            flex-direction: column;
+            display: flex;
+            flex: 1;
+        }
+
+        .percentage {
+            margin: 25px 0;
+        }
+
+        .rc-progress-line-path {
+            // stroke: green;
+        }
+    }
+}
+
 .home {
     @extend .task-window;
 

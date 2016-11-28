@@ -5,7 +5,7 @@ const settings = require('electron-settings')
 const {spawn, exec} = require('child_process')
 const AutoLaunch = require('auto-launch')
 
-const config = require('./config').getConfig(process.env.NODE_ENV == 'development')
+const config = require('./config').getConfig(process.env.NODE_ENV == 'development', __dirname)
 
 let SHOW_DEV_TOOLS = false
 let RESET_SETTINGS = false
@@ -27,8 +27,6 @@ const DEV_TOOLS_MODE = 'right'
 //------app/
 //------------------
 
-
-
 settings.defaults({
     overlayKey: 'F4',
     keyMap: {},
@@ -36,30 +34,23 @@ settings.defaults({
     hitchName: 'Wow-64.exe',
     playlist: []
 })
-// console.log(settings.getSettingsFilePath())
 settings.applyDefaultsSync()
-if(RESET_SETTINGS)
-    settings.resetToDefaults()
+if(RESET_SETTINGS) settings.resetToDefaults()
 
-//Project Dir
-//__dirname = 'k:\Ghubs\electron-react-starter\app'
-let dirParts = __dirname.split('\\')
-dirParts.pop()
-const PROJECT_DIR = dirParts.join('\\')
-// console.log(PROJECT_DIR)
-//in production PROJECT_DIR was K:\Ghubs\kindred\build\Kindred-win32-x64\resources\app which is the same folder as in dev
-
-require('electron-reload')(PROJECT_DIR+'\\bin') //TODO disable for production?
-
-// let dirParts = PROJECT_DIR.split('\\')
-// dirParts.pop()
-// dirParts.pop()
-// const PROD_EXE_FOLDER_PATH = dirParts.join('\\')
-// var autoLauncher = new AutoLaunch({
-//     name: 'Kindred',
-//     path: PROD_EXE_FOLDER_PATH + '\\Kindred.exe'
-// })
-// autoLauncher.enable()
+if(config.IS_DEV) {
+    require('electron-reload')(config.PATH_PACKAGE_JSON_FOLDER+'\\bin')
+}
+else
+{
+    var autoLauncher = new AutoLaunch({
+        name: 'Kindred',
+        path: config.PATH_PROD_EXE_FOLDER + '\\Kindred.exe',
+        manufacturer: 'Kindred Co.'
+    })
+    autoLauncher.enable()
+    // autoLauncher.disable()
+    // autoLauncher.isEnabled().then(isEnabled => {})
+}
 
 let mainWindow = null //keep reference to avoid GC
 let tray = null
@@ -68,10 +59,6 @@ let kindredKeysProcess = null
 
 const WIN_MAIN_WIDTH = 460 + (SHOW_DEV_TOOLS && DEV_TOOLS_MODE=='right'?500:0)
 const WIN_MAIN_HEIGHT = 330
-
-ipcMain.on('projectDir', (event, arg) => {
-    event.returnValue = PROJECT_DIR //synchronous return
-})
 
 ipcMain.on('userDataDir', (event, arg) => {
     // console.log(app.getPath('userData')) //C:\Users\Vessp\AppData\Roaming\Electron
@@ -104,7 +91,7 @@ ipcMain.on('registerKeyMap', (event, args) => {
     if(keyMap && Object.keys(keyMap).length > 0) {
         trace('registerKeyMap', hotkeyWindowTitle, keyMap)
         //const exePath = 'K:\\Ghubs\\AutoHotKey\\kankei\\KindredKeys.exe'
-        const exePath = PROJECT_DIR+'\\tools\\KindredKeys.exe'
+        const exePath = config.PATH_PACKAGE_JSON_FOLDER+'\\tools\\KindredKeys.exe'
         const keyMapString = JSON.stringify(keyMap).replace(/"/g, '\"') //need 2 slashes in front of double quotess, 1 to escape this JS, 1 to escape cmd
         kindredKeysProcess = spawn(exePath, [config.URL_SERVER_ROOT, keyMapString, hotkeyWindowTitle, false])
     }
@@ -123,12 +110,12 @@ function createWindow () {
         transparent: true,
         // toolbar: false,
         skipTaskbar: true,
+        //icon: '../assets/split.ico',
         // titleBarStyle: false,
 
-        // skip-taskbar: true,
         // darkTheme: true,
 
-        show: false,
+        show: false
     })
 
     // mainWindow.webContents.on('ready-to-show', function () {
@@ -138,7 +125,7 @@ function createWindow () {
     mainWindow.on('closed', () => {
         mainWindow = null
     })
-    mainWindow.loadURL('file://' + PROJECT_DIR + '/app/index.html')
+    mainWindow.loadURL('file://' + config.PATH_PACKAGE_JSON_FOLDER + '/main/index.html')
     if(SHOW_DEV_TOOLS)
         mainWindow.webContents.openDevTools({mode:DEV_TOOLS_MODE})
 }
@@ -190,7 +177,7 @@ function setOverlayKey(keyString) {
 app.on('ready', () => {
     createWindow()
 
-    tray = new Tray(PROJECT_DIR + '/app/assets/split.png')
+    tray = new Tray(config.PATH_PACKAGE_JSON_FOLDER + '/assets/split.png')
     const contextMenu = Menu.buildFromTemplate([
         {label: 'Upload', click: () => {
             mainWindow.webContents.send('doUpload')
@@ -231,12 +218,15 @@ app.on('activate', () => {
     }
 })
 
-process.on('uncaughtException', (error) => {
-    console.log('uncaughtException', error)
-    if(isAttemptingHotkeySet) {
-        toRenderer('setHotkeyError', error)
-    }
-})
+// process.on('uncaughtException', (error) => {
+//     console.log('uncaughtException', error)
+//     if(isAttemptingHotkeySet) {
+//         toRenderer('setHotkeyError', error)
+//     }
+//     else {
+//         app.quit()
+//     }
+// })
 
 function toRenderer(type, payload) {
     if(mainWindow && mainWindow.webContents)
