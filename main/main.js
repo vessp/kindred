@@ -44,8 +44,7 @@ else
 {
     var autoLauncher = new AutoLaunch({
         name: 'Kindred',
-        path: config.PATH_PROD_EXE_FOLDER + '\\Kindred.exe',
-        manufacturer: 'Kindred Co.'
+        path: config.PATH_ROOT_FOLDER + '\\Kindred.exe'
     })
     autoLauncher.enable()
     // autoLauncher.disable()

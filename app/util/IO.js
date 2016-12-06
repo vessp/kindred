@@ -1,13 +1,40 @@
 const fs = window.require('fs')
 const request = window.require('request')
 const requestProgress = window.require('request-progress')
-import {trace} from '../util/Tracer'
+import {trace, notify} from '../util/Tracer'
 
+
+function makePath(path) {
+    const pathParts = path.split('\\')
+    let curPath = pathParts[0]
+    pathParts.forEach((dir, i) => {
+        if(i>0)
+            curPath += '\\' + dir
+        if (!fs.existsSync(curPath)) {
+            trace('creating dir', curPath)
+            fs.mkdirSync(curPath);
+        }
+    });
+}
 
 module.exports = {
+
+    makePath: makePath,
+
     downloadFile: (url, path, onComplete=null, onProgress=null, onError=null) => {
         //if path is './asdf' it will write the file asdf in the project folder beside package.json
         trace('downloadFile', url, path)
+
+        const pathParts = path.split('\\')
+        pathParts.pop()
+        const dirPath = pathParts.join('\\')
+        makePath(dirPath)
+
+        if (!fs.existsSync(dirPath)) {
+            notify('could not create path to download file')
+            return
+        }
+
 
         return requestProgress(request(url), {
             throttle: 250,                    // Throttle the progress event to 2000ms, defaults to 1000ms 

@@ -4,7 +4,7 @@ const {dialog} = electron.remote
 const fs = window.require('fs')
 const axios = window.require('axios')
 const settings = window.require('electron-settings')
-import {trace} from '../util/Tracer'
+import {trace, notify} from '../util/Tracer'
 const {exec} = window.require('child_process')
 import IO from '../util/IO'
 
@@ -141,7 +141,10 @@ export function init() {
 
         startProcessChecking(dispatch, getState)
         // dispatch(doSocketConnect())
-        downloadUpdate(dispatch, getState)
+        downloadCrisp(dispatch, getState)
+
+        // migrateCrisp(dispatch, getState)
+        // notify(config.ROOT_FOLDER)
     }
 }
 
@@ -184,21 +187,38 @@ export function doSocketDisconnect() {
     }
 }
 
-export function downloadUpdate(dispatch, getState){
-
+export function downloadCrisp(dispatch, getState) {
     //first check latest version on server and compare to me
 
     //if new version available download file
     toReducer('isCrisp', false)
 
-    const zipfileUrl = config.URL_SERVER_ROOT + '/dist/Kindred-win32-x64.zip'
-    const dlPath = './crisp/Kindred-win32-x64.zip'
-    IO.downloadFile(zipfileUrl, dlPath, () => {
-        
+    const remoteFileUrl = config.URL_SERVER_ROOT + '/dist/Kindred-win32-x64.zip'
+    IO.downloadFile(remoteFileUrl, config.PATH_CRISP_ZIP, () => {
+        notify('dl complete')
     },
     (progress) => {
         toReducer('crispDlProgress', progress)
     })
+}
+
+export function migrateCrisp(dispatch, getState) {
+
+    //download file to userdata, unzip it
+    //quit, running batch from unzipped folder
+    //batch deletes old folder (passed in path?) and moves folder from userdata
+    //run newly copied exe
+
+    const bFile = config.PATH_TOOLS + '\\migrate.bat'
+    const arg1 = '"' + config.PATH_CRISP_UNZIP + '"'
+    const arg2 = '"' + config.PATH_ROOT_FOLDER + '"'
+    const cmd = bFile + ' ' + arg1 + ' ' + arg2
+
+    // exec(cmd, (error, stdout, stderr) => {
+    //     if(error) notify('error:', error)
+    //     if(stderr) notify('stderr:', stderr)
+    //     notify(stdout)
+    // })
 }
 
 let pingTimer = null

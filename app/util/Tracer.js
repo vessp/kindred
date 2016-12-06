@@ -11,3 +11,8 @@ export function trace(...items) {
     ipcRenderer.send('trace', items)
     console.log(...items)
 }
+
+export function notify(...items) {
+    trace(items)
+    alert(items)
+}
