@@ -189,29 +189,30 @@ export function doSocketDisconnect() {
 }
 
 export function downloadCrisp(dispatch, getState) {
-    //first check latest version on server and compare to me
+    //TODO first check latest version on server and compare to me
 
-    //if new version available download file
+    // if new version available download file
     toReducer('isCrisp', false)
 
-    const remoteFileUrl = config.URL_SERVER_ROOT + '/dist/Kindred-win32-x64.zip'
-    IO.downloadFile(remoteFileUrl, config.PATH_CRISP_ZIP, () => {
-        notify('dl complete')
-        toReducer('crispDlProgress', {
-            percentage: 1.0
-        })
+    // const remoteFileUrl = config.URL_SERVER_ROOT + '/dist/Kindred-win32-x64.zip'
+    // IO.downloadFile(remoteFileUrl, config.PATH_CRISP_ZIP, () => {
+    //     trace('dl complete')
+    //     toReducer('crispDlProgress', {
+    //         percentage: 1.0
+    //     })
 
-        fs.createReadStream(config.PATH_CRISP_ZIP)
-            .pipe(unzip.Extract({ path: config.PATH_CRISP })) //extract into this folder
-            //because i have a real folder directly inside the zip file, that folder will be 
-            //put into PATH_CRISP
+            fs.createReadStream(config.PATH_CRISP_ZIP)
+                .pipe(unzip.Extract({ path: config.PATH_CRISP })) //extract into this folder
+                //because i have a real folder directly inside the zip file, that folder will be 
+                //put into PATH_CRISP
 
             //TODO migrateCrisp
             console.log('unzipped')
-    },
-    (progress) => {
-        toReducer('crispDlProgress', progress)
-    })
+            migrateCrisp(dispatch, getState)
+    // },
+    // (progress) => {
+    //     toReducer('crispDlProgress', progress)
+    // })
 }
 
 export function migrateCrisp(dispatch, getState) {
@@ -222,11 +223,11 @@ export function migrateCrisp(dispatch, getState) {
     //run newly copied exe
 
     const bat = config.PATH_TOOLS + '\\migrate.bat'
-    const fromPath = config.PATH_CRISP_UNZIP
+    const fromPath = config.PATH_CRISP_UNZIPPED
     const toPath = config.PATH_ROOT_FOLDER
     const cmd = bat + ' "' + fromPath + '" "' + toPath + '"'
 
-    trace(cmd)
+    notify(cmd)
 
     // exec(cmd, (error, stdout, stderr) => {
     //     if(error) notify('error:', error)

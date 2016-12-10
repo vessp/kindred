@@ -38,7 +38,7 @@ module.exports = {
 
         const PATH_CRISP = PATH_USER_DATA + '\\crisp'
         const PATH_CRISP_ZIP = PATH_CRISP + '\\Kindred-win32-x64.zip'
-        const PATH_CRISP_UNZIP = PATH_CRISP + '\\Kindred-win32-x64'
+        const PATH_CRISP_UNZIPPED = PATH_CRISP + '\\Kindred-win32-x64'
 
         const config = {
             IS_DEV,
@@ -55,7 +55,7 @@ module.exports = {
             PATH_TOOLS,
             PATH_CRISP,
             PATH_CRISP_ZIP,
-            PATH_CRISP_UNZIP
+            PATH_CRISP_UNZIPPED
         }
 
         return config
