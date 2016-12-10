@@ -28,7 +28,8 @@
     "redux-promise-middleware": "^4.1.0",
     "redux-thunk": "^2.1.0",
     "request": "^2.79.0",
-    "request-progress": "^2.0.1"
+    "request-progress": "^2.0.1",
+    "unzip": "^0.1.11"
   },
   "devDependencies": {
     "autoprefixer": "^6.5.1",

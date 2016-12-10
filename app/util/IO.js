@@ -23,7 +23,7 @@ module.exports = {
 
     downloadFile: (url, path, onComplete=null, onProgress=null, onError=null) => {
         //if path is './asdf' it will write the file asdf in the project folder beside package.json
-        trace('downloadFile', url, path)
+        trace('downloadFile', url, '-->', path)
 
         const pathParts = path.split('\\')
         pathParts.pop()

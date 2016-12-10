@@ -13,6 +13,6 @@ export function trace(...items) {
 }
 
 export function notify(...items) {
-    trace(items)
+    trace(...items)
     alert(items)
 }
