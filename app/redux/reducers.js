@@ -23,7 +23,7 @@ const initialState = Immutable.fromJS({
     hitchName: null,
     userCount: null,
     isCrisp: false,
-    crispDlProgress: null,
+    crispStatus: null,
 
 })
 
@@ -115,9 +115,9 @@ function appReducer(state = initialState, action) {
         return state.merge({
             isCrisp: payload
         })
-    case 'crispDlProgress':
+    case 'crispStatus':
         return state.merge({
-            crispDlProgress: payload
+            crispStatus: payload
         })
     default:
         return state

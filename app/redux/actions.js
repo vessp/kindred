@@ -7,7 +7,6 @@ const settings = window.require('electron-settings')
 import {trace, notify} from '../util/Tracer'
 const {exec} = window.require('child_process')
 import IO from '../util/IO'
-const unzip = window.require('unzip')
 
 const config = ipcRenderer.sendSync('config')
 
@@ -194,25 +193,50 @@ export function downloadCrisp(dispatch, getState) {
     // if new version available download file
     toReducer('isCrisp', false)
 
-    // const remoteFileUrl = config.URL_SERVER_ROOT + '/dist/Kindred-win32-x64.zip'
-    // IO.downloadFile(remoteFileUrl, config.PATH_CRISP_ZIP, () => {
-    //     trace('dl complete')
-    //     toReducer('crispDlProgress', {
-    //         percentage: 1.0
-    //     })
+    const remoteFileUrl = config.URL_SERVER_ROOT + '/dist/Kindred-win32-x64.zip'
+    IO.downloadFile(remoteFileUrl, config.PATH_CRISP_ZIP, () => {
+        trace('finished downloading crisp')
+        toReducer('crispStatus', {
+            message: 'Extracting..'
+        })
 
-            fs.createReadStream(config.PATH_CRISP_ZIP)
-                .pipe(unzip.Extract({ path: config.PATH_CRISP })) //extract into this folder
-                //because i have a real folder directly inside the zip file, that folder will be 
-                //put into PATH_CRISP
+        
+        //because i have a real folder directly inside the zip file, 
+        //we can unzip into crisp, that innser folder will be put into crisp
+        const exePath = config.PATH_TOOLS + '\\unzip.exe'
+        const zipPath = config.PATH_CRISP_ZIP
+        const extractToPath = config.PATH_CRISP
+        const cmd = exePath + ' "' + zipPath + '" "' + extractToPath + '"'
 
-            //TODO migrateCrisp
-            console.log('unzipped')
-            migrateCrisp(dispatch, getState)
-    // },
-    // (progress) => {
-    //     toReducer('crispDlProgress', progress)
-    // })
+        exec(cmd, (error, stdout, stderr) => {
+            let message
+            if(error) {
+                trace('error:', error)
+                message = 'error: ' + error
+            }
+            else if(stderr) {
+                trace('stderr:', stderr)
+                message = 'stderr: ' + stderr
+            }
+            else {
+                if(stdout) trace('stdout', stdout)
+                message = 'Extracting Complete'
+            }
+            
+            toReducer('crispStatus', { message: message })
+
+            setTimeout(() => {
+                toReducer('crispStatus', { message: 'Kindred will restart..' })
+
+                setTimeout(() => {
+                    migrateCrisp(dispatch, getState)
+                }, 2000)
+            }, 2000)
+        })
+    },
+    (progress) => {
+        toReducer('crispStatus', progress)
+    })
 }
 
 export function migrateCrisp(dispatch, getState) {
@@ -227,13 +251,14 @@ export function migrateCrisp(dispatch, getState) {
     const toPath = config.PATH_ROOT_FOLDER
     const cmd = bat + ' "' + fromPath + '" "' + toPath + '"'
 
-    notify(cmd)
+    notify('cmd', cmd)
 
     // exec(cmd, (error, stdout, stderr) => {
     //     if(error) notify('error:', error)
     //     if(stderr) notify('stderr:', stderr)
-    //     notify(stdout)
+    //     notify('stdout', stdout)
     // })
+    // toMain('quit')
 }
 
 let pingTimer = null
